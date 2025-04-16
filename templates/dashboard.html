@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Welcome Section -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-heading font-bold text-gray-900">Welcome back, Admin</h1>
+        <p class="mt-2 text-gray-600">Here's what's happening with your recruitment pipeline.</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Total Candidates -->
+        <div class="bg-white rounded-lg shadow-sm p-6 hover-scale transition duration-300">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                    <i class="fas fa-users text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Total Candidates</p>
+                    <p class="text-2xl font-semibold text-gray-900">2,453</p>
+                </div>
+            </div>
+            <div class="mt-4 flex items-center text-sm text-green-600">
+                <i class="fas fa-arrow-up mr-1"></i>
+                <span>12% increase</span>
+            </div>
+        </div>
+
+        <!-- New Applications -->
+        <div class="bg-white rounded-lg shadow-sm p-6 hover-scale transition duration-300">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-green-100 text-green-600">
+                    <i class="fas fa-file-alt text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">New Applications</p>
+                    <p class="text-2xl font-semibold text-gray-900">147</p>
+                </div>
+            </div>
+            <div class="mt-4 flex items-center text-sm text-green-600">
+                <i class="fas fa-arrow-up mr-1"></i>
+                <span>8% increase</span>
+            </div>
+        </div>
+
+        <!-- Active Jobs -->
+        <div class="bg-white rounded-lg shadow-sm p-6 hover-scale transition duration-300">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+                    <i class="fas fa-briefcase text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Active Jobs</p>
+                    <p class="text-2xl font-semibold text-gray-900">38</p>
+                </div>
+            </div>
+            <div class="mt-4 flex items-center text-sm text-red-600">
+                <i class="fas fa-arrow-down mr-1"></i>
+                <span>3% decrease</span>
+            </div>
+        </div>
+
+        <!-- Successful Matches -->
+        <div class="bg-white rounded-lg shadow-sm p-6 hover-scale transition duration-300">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                    <i class="fas fa-handshake text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Successful Matches</p>
+                    <p class="text-2xl font-semibold text-gray-900">892</p>
+                </div>
+            </div>
+            <div class="mt-4 flex items-center text-sm text-green-600">
+                <i class="fas fa-arrow-up mr-1"></i>
+                <span>15% increase</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Recent Applications -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-lg shadow-sm">
+                <div class="p-6 border-b border-gray-200">
+                    <h2 class="text-xl font-heading font-semibold text-gray-900">Recent Applications</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Candidate
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Position
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Match Score
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Status
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for application, candidate, job in recent_applications %}
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900">{{ candidate.name }}</div>
+                                            <div class="text-sm text-gray-500">{{ candidate.email }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">{{ job.title }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">{{ "%.0f"|format(application.match_score) }}%</div>
+                                    <div class="w-16 bg-gray-200 rounded-full h-2">
+                                        <div class="bg-green-500 rounded-full h-2" style="width: '{{ application.match_score }}%'"></div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                               {% if application.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                               {% elif application.status == 'accepted' %}bg-green-100 text-green-800
+                                               {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                        {{ application.status|title }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="p-4 border-t border-gray-200">
+                    <a href="#" class="text-sm font-medium text-blue-600 hover:text-blue-500">
+                        View all applications <i class="fas fa-arrow-right ml-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Skills Distribution -->
+        <div class="space-y-4">
+            {% for skill, percentage in top_skills.items() %}
+            <div>
+                <div class="flex justify-between mb-1">
+                    <span class="text-sm font-medium text-gray-700">{{ skill }}</span>
+                    <span class="text-sm text-gray-500">{{ percentage }}%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-blue-600 rounded-full h-2" style="width: '{{ percentage }}%'"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+            <!-- Quick Actions -->
+            <div class="mt-8 bg-white rounded-lg shadow-sm">
+                <div class="p-6 border-b border-gray-200">
+                    <h2 class="text-xl font-heading font-semibold text-gray-900">Quick Actions</h2>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-4">
+                        <a href="/upload" class="flex items-center p-3 text-base font-medium text-gray-900 bg-gray-50 rounded-lg hover:bg-gray-100 group hover:shadow">
+                            <i class="fas fa-upload text-blue-600 mr-3"></i>
+                            Upload New Resume
+                        </a>
+                        <a href="/jobs" class="flex items-center p-3 text-base font-medium text-gray-900 bg-gray-50 rounded-lg hover:bg-gray-100 group hover:shadow">
+                            <i class="fas fa-plus-circle text-green-600 mr-3"></i>
+                            Post New Job
+                        </a>
+                        <a href="/report" class="flex items-center p-3 text-base font-medium text-gray-900 bg-gray-50 rounded-lg hover:bg-gray-100 group hover:shadow">
+                            <i class="fas fa-chart-bar text-purple-600 mr-3"></i>
+                            View Reports
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

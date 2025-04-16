@@ -1,0 +1,303 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header Section -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-heading font-bold text-gray-900">Analytics & Reports</h1>
+        <p class="mt-2 text-gray-600">Gain insights into your recruitment pipeline and hiring trends</p>
+    </div>
+
+    <!-- Date Range Filter -->
+    <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="md:col-span-2">
+                <select class="w-full border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    <option value="last7">Last 7 days</option>
+                    <option value="last30">Last 30 days</option>
+                    <option value="last90">Last 90 days</option>
+                    <option value="custom">Custom range</option>
+                </select>
+            </div>
+            <div>
+                <button class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+                    <i class="fas fa-download mr-2"></i>
+                    Export Report
+                </button>
+            </div>
+            <div>
+                <button class="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                    <i class="fas fa-sync-alt mr-2"></i>
+                    Refresh Data
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Applications Overview -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+            <h2 class="text-lg font-heading font-semibold text-gray-900 mb-6">Applications Overview</h2>
+            <div class="relative" style="height: 300px;">
+                <!-- Canvas for Chart.js -->
+                <canvas id="applicationsChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Skills Distribution -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+            <h2 class="text-lg font-heading font-semibold text-gray-900 mb-6">Skills Distribution</h2>
+            <div class="relative" style="height: 300px;">
+                <!-- Canvas for Chart.js -->
+                <canvas id="skillsChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Statistics -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        <!-- Hiring Pipeline -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+            <h2 class="text-lg font-heading font-semibold text-gray-900 mb-6">Hiring Pipeline</h2>
+            <div class="space-y-4">
+                <div>
+                    <div class="flex justify-between mb-1">
+                        <span class="text-sm font-medium text-gray-700">Applied</span>
+                        <span class="text-sm text-gray-500">245</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-blue-600 rounded-full h-2" style="width: 100%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between mb-1">
+                        <span class="text-sm font-medium text-gray-700">Screened</span>
+                        <span class="text-sm text-gray-500">180</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-blue-600 rounded-full h-2" style="width: 73%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between mb-1">
+                        <span class="text-sm font-medium text-gray-700">Interviewed</span>
+                        <span class="text-sm text-gray-500">85</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-blue-600 rounded-full h-2" style="width: 35%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between mb-1">
+                        <span class="text-sm font-medium text-gray-700">Offered</span>
+                        <span class="text-sm text-gray-500">32</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-blue-600 rounded-full h-2" style="width: 13%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between mb-1">
+                        <span class="text-sm font-medium text-gray-700">Hired</span>
+                        <span class="text-sm text-gray-500">28</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-blue-600 rounded-full h-2" style="width: 11%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Department Distribution -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+            <h2 class="text-lg font-heading font-semibold text-gray-900 mb-6">Department Distribution</h2>
+            <div class="relative" style="height: 250px;">
+                <!-- Canvas for Chart.js -->
+                <canvas id="departmentChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Time to Hire -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+            <h2 class="text-lg font-heading font-semibold text-gray-900 mb-6">Time to Hire</h2>
+            <div class="relative" style="height: 250px;">
+                <!-- Canvas for Chart.js -->
+                <canvas id="timeToHireChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="bg-white rounded-lg shadow-sm p-6">
+        <h2 class="text-lg font-heading font-semibold text-gray-900 mb-6">Recent Activity</h2>
+        <div class="flow-root">
+            <ul class="-mb-8">
+                <li>
+                    <div class="relative pb-8">
+                        <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
+                        <div class="relative flex space-x-3">
+                            <div>
+                                <span class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center ring-8 ring-white">
+                                    <i class="fas fa-user-plus text-white"></i>
+                                </span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="text-sm text-gray-500">
+                                    New candidate <span class="font-medium text-gray-900">Shahrukh</span> applied for 
+                                    <span class="font-medium text-gray-900">Senior Developer</span>
+                                </div>
+                                <div class="mt-1 text-sm text-gray-500">
+                                    2 hours ago
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="relative pb-8">
+                        <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
+                        <div class="relative flex space-x-3">
+                            <div>
+                                <span class="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center ring-8 ring-white">
+                                    <i class="fas fa-check text-white"></i>
+                                </span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="text-sm text-gray-500">
+                                    <span class="font-medium text-gray-900">Maitri Singh</span> was hired as 
+                                    <span class="font-medium text-gray-900">UI/UX Designer</span>
+                                </div>
+                                <div class="mt-1 text-sm text-gray-500">
+                                    1 day ago
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <!-- Add more activity items as needed -->
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Charts Initialization -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Applications Overview Chart
+    const applicationsCtx = document.getElementById('applicationsChart').getContext('2d');
+    new Chart(applicationsCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Applications',
+                data: [65, 78, 90, 85, 95, 110],
+                borderColor: '#2563eb',
+                tension: 0.4,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Skills Distribution Chart
+    const skillsCtx = document.getElementById('skillsChart').getContext('2d');
+    new Chart(skillsCtx, {
+        type: 'bar',
+        data: {
+            labels: ['JavaScript', 'Python', 'Java', 'React', 'Node.js'],
+            datasets: [{
+                label: 'Candidates',
+                data: [85, 72, 65, 58, 45],
+                backgroundColor: '#2563eb'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Department Distribution Chart
+    const departmentCtx = document.getElementById('departmentChart').getContext('2d');
+    new Chart(departmentCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Engineering', 'Design', 'Marketing', 'Sales'],
+            datasets: [{
+                data: [45, 25, 20, 10],
+                backgroundColor: ['#2563eb', '#7c3aed', '#db2777', '#ea580c']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Time to Hire Chart
+    const timeToHireCtx = document.getElementById('timeToHireChart').getContext('2d');
+    new Chart(timeToHireCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Engineering', 'Design', 'Marketing', 'Sales'],
+            datasets: [{
+                label: 'Days',
+                data: [25, 18, 15, 20],
+                backgroundColor: '#2563eb'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Average Days'
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

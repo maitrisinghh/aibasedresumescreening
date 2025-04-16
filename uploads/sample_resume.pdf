@@ -1,0 +1,103 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog
+   /Pages 2 0 R
+>>
+endobj
+
+2 0 obj
+<< /Type /Pages
+   /Kids [3 0 R]
+   /Count 1
+>>
+endobj
+
+3 0 obj
+<< /Type /Page
+   /Parent 2 0 R
+   /Resources << /Font << /F1 4 0 R >> >>
+   /MediaBox [0 0 612 792]
+   /Contents 5 0 R
+>>
+endobj
+
+4 0 obj
+<< /Type /Font
+   /Subtype /Type1
+   /BaseFont /Helvetica
+>>
+endobj
+
+5 0 obj
+<< /Length 1000 >>
+stream
+BT
+/F1 24 Tf
+50 700 Td
+(John Smith) Tj
+/F1 12 Tf
+0 -20 Td
+(Software Engineer) Tj
+0 -15 Td
+(john.smith@email.com | (555) 123-4567) Tj
+
+0 -40 Td
+/F1 14 Tf
+(Skills) Tj
+/F1 12 Tf
+0 -20 Td
+(- Python, JavaScript, React, Node.js, SQL) Tj
+0 -15 Td
+(- AWS, Docker, Git, CI/CD) Tj
+0 -15 Td
+(- Agile methodologies, Team leadership) Tj
+
+0 -40 Td
+/F1 14 Tf
+(Experience) Tj
+/F1 12 Tf
+0 -20 Td
+(Senior Software Engineer - Tech Corp) Tj
+0 -15 Td
+(2020 - Present) Tj
+0 -15 Td
+(- Led development of microservices architecture) Tj
+0 -15 Td
+(- Implemented CI/CD pipelines reducing deployment time by 50%) Tj
+
+0 -25 Td
+(Software Engineer - StartupX) Tj
+0 -15 Td
+(2018 - 2020) Tj
+0 -15 Td
+(- Developed full-stack web applications using React and Node.js) Tj
+0 -15 Td
+(- Optimized database queries improving performance by 30%) Tj
+
+0 -40 Td
+/F1 14 Tf
+(Education) Tj
+/F1 12 Tf
+0 -20 Td
+(Bachelor of Science in Computer Science) Tj
+0 -15 Td
+(University of Technology - 2018) Tj
+ET
+endstream
+endobj
+
+xref
+0 6
+0000000000 65535 f
+0000000009 00000 n
+0000000058 00000 n
+0000000115 00000 n
+0000000233 00000 n
+0000000301 00000 n
+trailer
+<< /Size 6
+   /Root 1 0 R
+>>
+startxref
+1354
+%%EOF

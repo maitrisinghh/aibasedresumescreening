@@ -1,0 +1,320 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Success Banner -->
+    <div class="mb-8 bg-green-50 border-l-4 border-green-500 p-4 rounded-md">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <i class="fas fa-check-circle text-green-500"></i>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-lg font-medium text-green-800">Resume Successfully Processed</h3>
+                <p class="mt-2 text-green-700">
+                    We've analyzed {{ candidate.name }}'s resume and matched it with our open positions.
+                </p>
+                <div class="mt-4">
+                    <div class="flex space-x-3">
+                        <a href="{{ url_for('dashboard') }}" class="text-sm font-medium text-green-700 hover:text-green-600">
+                            Go to Dashboard <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Candidate Info -->
+    <div class="mb-8">
+        <div class="flex items-center mb-6">
+            <div class="h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                <i class="fas fa-user-tie text-2xl"></i>
+            </div>
+            <div class="ml-4">
+                <h1 class="text-3xl font-heading font-bold text-gray-900">{{ candidate.name }}</h1>
+                <div class="flex mt-2 space-x-4 text-gray-600">
+                    <div class="flex items-center">
+                        <i class="fas fa-envelope mr-2"></i> {{ candidate.email }}
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-phone mr-2"></i> {{ candidate.phone }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Left Column: Resume Summary -->
+        <div>
+            <div class="bg-white rounded-lg shadow-sm mb-6">
+                <div class="p-6 border-b border-gray-200">
+                    <h2 class="text-xl font-heading font-semibold text-gray-900">Skills</h2>
+                </div>
+                <div class="p-6">
+                    <div class="flex flex-wrap">
+                        {% for skill in candidate.skills %}
+                        <span class="m-1 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm">{{ skill }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Experience -->
+            <div class="bg-white rounded-lg shadow-sm mb-6">
+                <div class="p-6 border-b border-gray-200">
+                    <h2 class="text-xl font-heading font-semibold text-gray-900">Experience</h2>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-6">
+                        {% for exp in experience %}
+                        <div>
+                            <h3 class="font-semibold text-gray-900">{{ exp.title }}</h3>
+                            <div class="text-sm text-gray-600">{{ exp.company }}</div>
+                            <div class="text-sm text-gray-500">{{ exp.duration }}</div>
+                            {% if exp.description %}
+                            <div class="mt-2 text-sm text-gray-700">{{ exp.description }}</div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Education -->
+            <div class="bg-white rounded-lg shadow-sm">
+                <div class="p-6 border-b border-gray-200">
+                    <h2 class="text-xl font-heading font-semibold text-gray-900">Education</h2>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-6">
+                        {% for edu in education %}
+                        <div>
+                            <h3 class="font-semibold text-gray-900">{{ edu.degree }}</h3>
+                            <div class="text-sm text-gray-600">{{ edu.institution }}</div>
+                            <div class="text-sm text-gray-500">{{ edu.duration }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Job Matches -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-lg shadow-sm">
+                <div class="p-6 border-b border-gray-200">
+                    <h2 class="text-xl font-heading font-semibold text-gray-900">Career Matches</h2>
+                    <p class="mt-1 text-sm text-gray-500">
+                        Based on your skills and experience, here are potential career paths and specific job opportunities that might interest you.
+                    </p>
+                </div>
+                <div class="p-6 space-y-6">
+                    {% if matches %}
+                        <div class="mb-4 flex justify-between items-center">
+                            <div class="text-sm text-gray-600">
+                                <div class="pagination-info">
+                                    Showing {{ (page - 1) * per_page + 1 }} to {{ (page * per_page)|min(total_matches) }} of {{ total_matches }} matches
+                                </div>
+                            </div>
+                            {% if total_pages > 1 %}
+                            <div class="flex space-x-2">
+                                {% if page > 1 %}
+                                <a href="{{ url_for('resume_results', email=candidate.email, page=page-1) }}" 
+                                   class="px-3 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200">
+                                    Previous
+                                </a>
+                                {% endif %}
+                                {% if page < total_pages %}
+                                <a href="{{ url_for('resume_results', email=candidate.email, page=page+1) }}" 
+                                   class="px-3 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200">
+                                    Next
+                                </a>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Loading indicator -->
+                        <div id="loading-indicator" class="hidden">
+                            <div class="flex justify-center items-center py-8">
+                                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                                <span class="ml-2 text-gray-600">Loading matches...</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Matches container -->
+                        <div id="matches-container">
+                            {% for match in matches %}
+                            <div class="border border-gray-200 rounded-lg p-6 hover:border-blue-300 transition duration-300 mb-4">
+                                <!-- Job Header -->
+                                <div class="flex justify-between items-start mb-4">
+                                    <div class="flex-grow">
+                                        <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ match.job.title }}</h3>
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <div class="flex items-center text-gray-600">
+                                                <i class="fas fa-building w-5"></i>
+                                                <span class="ml-2">{{ match.job.company }}</span>
+                                            </div>
+                                            <div class="flex items-center text-gray-600">
+                                                <i class="fas fa-briefcase w-5"></i>
+                                                <span class="ml-2">{{ match.job.role }}</span>
+                                            </div>
+                                            <div class="flex items-center text-gray-600">
+                                                <i class="fas fa-dollar-sign w-5"></i>
+                                                <span class="ml-2">{{ match.job.salary_range }}</span>
+                                            </div>
+                                            <div class="flex items-center text-gray-600">
+                                                <i class="fas fa-clock w-5"></i>
+                                                <span class="ml-2">{{ match.job.work_type }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-center ml-6">
+                                        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-blue-50 text-blue-700">
+                                            <span class="text-2xl font-bold">{{ "%.0f"|format(match.match_score) }}</span>
+                                        </div>
+                                        <div class="mt-1 text-sm text-gray-500">Match Score</div>
+                                    </div>
+                                </div>
+
+                                <!-- Match visualization -->
+                                <div class="mb-6">
+                                    <div class="w-full bg-gray-100 rounded-full h-3">
+                                        <div class="bg-blue-600 rounded-full h-3 transition-all duration-500" style="width: {{ match.match_score|int }}%;"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Required Skills -->
+                                <div class="mb-6">
+                                    <h4 class="font-medium text-gray-900 mb-3">Required Skills</h4>
+                                    {% if match.job.requirements and match.job.requirements.skills %}
+                                        <div class="flex flex-wrap gap-2 mb-2">
+                                            {% for skill in match.job.requirements.skills %}
+                                                {% if skill.lower() in candidate.skills|map('lower')|list %}
+                                                    <span class="px-3 py-1 bg-green-50 text-green-700 rounded-full text-sm border border-green-200">
+                                                        <i class="fas fa-check-circle mr-1"></i>{{ skill }}
+                                                    </span>
+                                                {% else %}
+                                                    <span class="px-3 py-1 bg-gray-50 text-gray-600 rounded-full text-sm border border-gray-200">{{ skill }}</span>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                        {% set matching_skills = match.job.requirements.skills|select('lower')|intersect(candidate.skills|map('lower')|list)|list %}
+                                        <p class="text-sm text-gray-600">
+                                            Matches {{ matching_skills|length }} out of {{ match.job.requirements.skills|length }} required skills
+                                        </p>
+                                    {% else %}
+                                        <p class="text-sm text-gray-600">No specific skills required</p>
+                                    {% endif %}
+                                </div>
+
+                                <!-- AI Analysis -->
+                                {% if match.ai_analysis %}
+                                <div class="space-y-4">
+                                    {% if match.ai_analysis.summary %}
+                                    <div class="text-sm text-gray-600 bg-gray-50 p-4 rounded-lg">
+                                        {{ match.ai_analysis.summary }}
+                                    </div>
+                                    {% endif %}
+
+                                    <div class="grid md:grid-cols-2 gap-4">
+                                        {% if match.ai_analysis.strengths %}
+                                        <div class="bg-green-50 p-4 rounded-lg">
+                                            <h4 class="font-medium text-green-800 mb-2">
+                                                <i class="fas fa-check-circle mr-2"></i>Strengths
+                                            </h4>
+                                            <ul class="space-y-2 text-sm text-green-700">
+                                                {% for strength in match.ai_analysis.strengths %}
+                                                <li class="flex items-start">
+                                                    <span class="mr-2">•</span>
+                                                    <span>{{ strength }}</span>
+                                                </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                        {% endif %}
+
+                                        {% if match.ai_analysis.gaps %}
+                                        <div class="bg-orange-50 p-4 rounded-lg">
+                                            <h4 class="font-medium text-orange-800 mb-2">
+                                                <i class="fas fa-exclamation-circle mr-2"></i>Areas for Growth
+                                            </h4>
+                                            <ul class="space-y-2 text-sm text-orange-700">
+                                                {% for gap in match.ai_analysis.gaps %}
+                                                <li class="flex items-start">
+                                                    <span class="mr-2">•</span>
+                                                    <span>{{ gap }}</span>
+                                                </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+
+                                    {% if match.ai_analysis.recommendations %}
+                                    <div class="bg-blue-50 p-4 rounded-lg">
+                                        <h4 class="font-medium text-blue-800 mb-2">
+                                            <i class="fas fa-lightbulb mr-2"></i>Recommendations
+                                        </h4>
+                                        <ul class="space-y-2 text-sm text-blue-700">
+                                            {% for rec in match.ai_analysis.recommendations %}
+                                            <li class="flex items-start">
+                                                <span class="mr-2">•</span>
+                                                <span>{{ rec }}</span>
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Pagination at bottom -->
+                        {% if total_pages > 1 %}
+                        <div class="mt-4 flex justify-center">
+                            <div class="flex space-x-2">
+                                {% for p in range(1, total_pages + 1) %}
+                                <a href="{{ url_for('resume_results', email=candidate.email, page=p) }}" 
+                                   class="px-3 py-1 rounded {% if p == page %}bg-blue-500 text-white{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200{% endif %}">
+                                    {{ p }}
+                                </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-8">
+                            <div class="text-gray-500 mb-4">
+                                <i class="fas fa-search fa-3x"></i>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900">No Matches Found</h3>
+                            <p class="mt-1 text-sm text-gray-500">
+                                We couldn't find any matching career paths or job opportunities based on your resume. Try adding more details to your resume or check back later.
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle pagination clicks
+    document.querySelectorAll('a[href*="page="]').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            document.getElementById('loading-indicator').classList.remove('hidden');
+            document.getElementById('matches-container').classList.add('opacity-50');
+        });
+    });
+});
+</script>
+{% endblock %}

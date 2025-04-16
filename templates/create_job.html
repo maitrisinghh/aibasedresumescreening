@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-heading font-bold text-gray-900">Create New Job Posting</h1>
+        <p class="mt-2 text-gray-600">Fill in the details to create a new job posting</p>
+    </div>
+
+    <!-- Job Creation Form -->
+    <form id="createJobForm" class="space-y-6">
+        <!-- Basic Information -->
+        <div class="bg-white shadow rounded-lg p-6">
+            <h2 class="text-xl font-semibold mb-4">Basic Information</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Job Title -->
+                <div>
+                    <label for="title" class="block text-sm font-medium text-gray-700">Job Title *</label>
+                    <input type="text" id="title" name="title" required
+                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+
+                <!-- Department -->
+                <div>
+                    <label for="department" class="block text-sm font-medium text-gray-700">Department *</label>
+                    <input type="text" id="department" name="department" required
+                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+
+                <!-- Location -->
+                <div>
+                    <label for="location" class="block text-sm font-medium text-gray-700">Location *</label>
+                    <input type="text" id="location" name="location" required
+                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+
+                <!-- Salary Range -->
+                <div>
+                    <label for="salary_range" class="block text-sm font-medium text-gray-700">Salary Range</label>
+                    <input type="text" id="salary_range" name="salary_range"
+                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="e.g., $50,000 - $70,000">
+                </div>
+            </div>
+        </div>
+
+        <!-- Job Description -->
+        <div class="bg-white shadow rounded-lg p-6">
+            <h2 class="text-xl font-semibold mb-4">Job Description</h2>
+            <div>
+                <label for="description" class="block text-sm font-medium text-gray-700">Description *</label>
+                <textarea id="description" name="description" rows="4" required
+                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+            </div>
+        </div>
+
+        <!-- Requirements -->
+        <div class="bg-white shadow rounded-lg p-6">
+            <h2 class="text-xl font-semibold mb-4">Requirements</h2>
+            
+            <!-- Skills -->
+            <div class="mb-4">
+                <label for="skills" class="block text-sm font-medium text-gray-700">Required Skills *</label>
+                <textarea id="skills" name="skills" rows="2" required
+                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Enter skills separated by commas"></textarea>
+            </div>
+
+            <!-- Experience -->
+            <div class="mb-4">
+                <label for="experience" class="block text-sm font-medium text-gray-700">Experience Requirements *</label>
+                <textarea id="experience" name="experience" rows="2" required
+                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="e.g., 3+ years of experience in web development"></textarea>
+            </div>
+
+            <!-- Education -->
+            <div>
+                <label for="education" class="block text-sm font-medium text-gray-700">Education Requirements *</label>
+                <textarea id="education" name="education" rows="2" required
+                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="e.g., Bachelor's degree in Computer Science"></textarea>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex justify-end space-x-4">
+            <a href="/jobs" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                Cancel
+            </a>
+            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                Create Job Posting
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- JavaScript for form handling -->
+<script>
+document.getElementById('createJobForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    // Collect form data
+    const formData = {
+        title: document.getElementById('title').value,
+        department: document.getElementById('department').value,
+        location: document.getElementById('location').value,
+        description: document.getElementById('description').value,
+        salary_range: document.getElementById('salary_range').value,
+        requirements: {
+            skills: document.getElementById('skills').value.split(',').map(skill => skill.trim()),
+            experience: document.getElementById('experience').value,
+            education: document.getElementById('education').value
+        }
+    };
+
+    try {
+        const response = await fetch('/api/jobs', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            // Show success message
+            alert('Job posting created successfully!');
+            // Redirect to jobs page
+            window.location.href = '/jobs';
+        } else {
+            const error = await response.json();
+            alert(error.error || 'Failed to create job posting');
+        }
+    } catch (error) {
+        alert('An error occurred while creating the job posting');
+        console.error('Error:', error);
+    }
+});
+</script>
+{% endblock %} 

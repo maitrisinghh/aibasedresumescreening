@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header Section -->
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-heading font-bold text-gray-900">Job Listings</h1>
+            <p class="mt-2 text-gray-600">Manage and match candidates with open positions</p>
+        </div>
+        <a href="/jobs/create" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            <i class="fas fa-plus mr-2"></i>
+            Post New Job
+        </a>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <!-- Search -->
+            <div class="md:col-span-2">
+                <div class="relative">
+                    <input type="text" id="searchInput" placeholder="Search jobs..." 
+                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-gray-400"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Department Filter -->
+            <div>
+                <select id="departmentFilter" class="w-full border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">All Departments</option>
+                    {% for dept in departments %}
+                    <option value="{{ dept }}" {% if dept == current_department %}selected{% endif %}>{{ dept }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <!-- Status Filter -->
+            <div>
+                <select id="statusFilter" class="w-full border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">All Statuses</option>
+                    {% for status in statuses %}
+                    <option value="{{ status }}" {% if status == current_status %}selected{% endif %}>{{ status|title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Job Listings -->
+    <div class="space-y-6">
+        {% for job_data in jobs %}
+        <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition duration-300">
+            <div class="p-6">
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center">
+                            <h2 class="text-xl font-heading font-semibold text-gray-900">{{ job_data.job.title }}</h2>
+                            <span class="ml-3 px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                {% if job_data.job.status == 'active' %}bg-green-100 text-green-800
+                                {% elif job_data.job.status == 'draft' %}bg-yellow-100 text-yellow-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ job_data.job.status|title }}
+                            </span>
+                        </div>
+                        <div class="mt-2 flex items-center text-sm text-gray-500">
+                            <i class="fas fa-building mr-2"></i>
+                            {{ job_data.job.department }}
+                        </div>
+                        <div class="mt-2 flex items-center text-sm text-gray-500">
+                            <i class="fas fa-map-marker-alt mr-2"></i>
+                            {{ job_data.job.location }}
+                        </div>
+                        <div class="mt-4">
+                            <h3 class="text-sm font-medium text-gray-900">Required Skills:</h3>
+                            <div class="mt-2 flex flex-wrap gap-2">
+                                {% for skill in job_data.job.requirements.skills %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    {{ skill }}
+                                </span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ml-6 flex flex-col items-end">
+                        <div class="flex items-center space-x-2 mb-4">
+                            <span class="text-sm font-medium text-gray-900">{{ job_data.match_count }} Candidates</span>
+                            <div class="flex -space-x-1">
+                                <div class="h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center text-xs text-gray-500">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                {% if job_data.match_count > 1 %}
+                                <div class="h-6 w-6 rounded-full bg-gray-300 flex items-center justify-center text-xs text-gray-500">
+                                    +{{ job_data.match_count - 1 }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <a href="/jobs/{{ job_data.job.id }}/matches" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            View Matches
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-200 px-6 py-4">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center space-x-4">
+                        <span class="flex items-center text-sm text-gray-500">
+                            <i class="far fa-clock mr-1"></i>
+                            Posted {{ job_data.job.created_at.strftime('%Y-%m-%d') }}
+                        </span>
+                        {% if job_data.job.salary_range %}
+                        <span class="flex items-center text-sm text-gray-500">
+                            <i class="far fa-money-bill-alt mr-1"></i>
+                            {{ job_data.job.salary_range }}
+                        </span>
+                        {% endif %}
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <a href="/jobs/{{ job_data.job.id }}/edit" class="text-gray-400 hover:text-gray-500">
+                            <i class="far fa-edit"></i>
+                        </a>
+                        <button onclick="deleteJob({{ job_data.job.id }})" class="text-gray-400 hover:text-red-500">
+                            <i class="far fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if pagination.pages > 1 %}
+    <div class="mt-8 flex items-center justify-between">
+        <div class="flex-1 flex justify-between sm:hidden">
+            {% if pagination.has_prev %}
+            <a href="{{ url_for('jobs', page=pagination.prev_num, department=current_department, status=current_status) }}" 
+               class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                Previous
+            </a>
+            {% endif %}
+            {% if pagination.has_next %}
+            <a href="{{ url_for('jobs', page=pagination.next_num, department=current_department, status=current_status) }}" 
+               class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                Next
+            </a>
+            {% endif %}
+        </div>
+        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+            <div>
+                <p class="text-sm text-gray-700">
+                    Showing <span class="font-medium">{{ pagination.first }}</span> to <span class="font-medium">{{ pagination.last }}</span> of <span class="font-medium">{{ pagination.total }}</span> results
+                </p>
+            </div>
+            <div>
+                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                    {% if pagination.has_prev %}
+                    <a href="{{ url_for('jobs', page=pagination.prev_num, department=current_department, status=current_status) }}" 
+                       class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                    {% endif %}
+                    
+                    {% for page in pagination.iter_pages() %}
+                        {% if page %}
+                            <a href="{{ url_for('jobs', page=page, department=current_department, status=current_status) }}" 
+                               class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium {% if page == pagination.page %}bg-blue-50 text-blue-600{% else %}bg-white text-gray-700 hover:bg-gray-50{% endif %}">
+                                {{ page }}
+                            </a>
+                        {% else %}
+                            <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                                ...
+                            </span>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if pagination.has_next %}
+                    <a href="{{ url_for('jobs', page=pagination.next_num, department=current_department, status=current_status) }}" 
+                       class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                    {% endif %}
+                </nav>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- JavaScript for filters and delete functionality -->
+<script>
+// Filter functionality
+document.getElementById('departmentFilter').addEventListener('change', function() {
+    const department = this.value;
+    const status = document.getElementById('statusFilter').value;
+    window.location.href = `/jobs?department=${department}&status=${status}`;
+});
+
+document.getElementById('statusFilter').addEventListener('change', function() {
+    const status = this.value;
+    const department = document.getElementById('departmentFilter').value;
+    window.location.href = `/jobs?department=${department}&status=${status}`;
+});
+
+// Search functionality
+document.getElementById('searchInput').addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase();
+    const jobCards = document.querySelectorAll('.bg-white.rounded-lg');
+    
+    jobCards.forEach(card => {
+        const title = card.querySelector('h2').textContent.toLowerCase();
+        const department = card.querySelector('.fa-building').nextSibling.textContent.trim().toLowerCase();
+        const location = card.querySelector('.fa-map-marker-alt').nextSibling.textContent.trim().toLowerCase();
+        
+        if (title.includes(searchTerm) || department.includes(searchTerm) || location.includes(searchTerm)) {
+            card.style.display = '';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+});
+
+// Delete job functionality
+async function deleteJob(jobId) {
+    if (confirm('Are you sure you want to delete this job posting?')) {
+        try {
+            const response = await fetch(`/api/jobs/${jobId}`, {
+                method: 'DELETE'
+            });
+            
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                const error = await response.json();
+                alert(error.error || 'Failed to delete job posting');
+            }
+        } catch (error) {
+            alert('An error occurred while deleting the job posting');
+            console.error('Error:', error);
+        }
+    }
+}
+</script>
+{% endblock %}

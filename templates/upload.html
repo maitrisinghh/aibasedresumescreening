@@ -1,0 +1,282 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="max-w-3xl mx-auto">
+        <!-- Page Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-3xl font-heading font-bold text-gray-900 mb-4">
+                Upload Resume
+            </h1>
+            <p class="text-gray-600">
+                Upload a resume in PDF, DOC, or DOCX format. Our AI will analyze the content and match it with suitable job positions.
+            </p>
+        </div>
+
+        <!-- Upload Container -->
+        <div class="bg-white rounded-lg shadow-lg p-8">
+            <form action="/upload" method="POST" enctype="multipart/form-data" class="space-y-6">
+                <!-- Personal Information -->
+                <div class="space-y-4">
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
+                        <input type="text" name="name" id="name" required
+                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                        <input type="email" name="email" id="email" required
+                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="phone" class="block text-sm font-medium text-gray-700">Phone</label>
+                        <input type="tel" name="phone" id="phone" required
+                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+
+                <!-- Drag & Drop Zone -->
+                <div id="drop-zone" 
+                    class="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center hover:border-blue-500 transition-colors duration-200 ease-in-out cursor-pointer">
+                    <div class="space-y-4">
+                        <div class="text-blue-500 text-5xl">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <div class="text-xl font-medium text-gray-700">
+                            Drag & drop your resume here
+                        </div>
+                        <div class="text-gray-500">
+                            or
+                        </div>
+                        <div>
+                            <label for="resume" 
+                                class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer transition duration-150 ease-in-out">
+                                <i class="fas fa-folder-open mr-2"></i>
+                                Browse Files
+                            </label>
+                            <input id="resume" name="resume" type="file" class="hidden" accept=".pdf,.doc,.docx" required>
+                        </div>
+                        <div id="selected-file" class="text-sm text-gray-500 hidden">
+                            Selected file: <span id="file-name"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex justify-end">
+                    <button type="submit"
+                        class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <i class="fas fa-upload mr-2"></i>
+                        Upload and Analyze
+                    </button>
+                </div>
+            </form>
+
+            <!-- File Requirements -->
+            <div class="mt-6">
+                <h3 class="text-sm font-medium text-gray-700 mb-3">Requirements:</h3>
+                <ul class="text-sm text-gray-500 space-y-2">
+                    <li class="flex items-center">
+                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                        Accepted formats: PDF, DOC, DOCX
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                        Maximum file size: 5MB
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                        Text must be clear and readable
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Upload Progress (Hidden by default) -->
+            <div id="upload-progress" class="mt-6 hidden">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-gray-700">Uploading...</span>
+                    <span class="text-sm text-gray-500" id="progress-percentage">0%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-blue-600 h-2 rounded-full" style="width: 0%" id="progress-bar"></div>
+                </div>
+            </div>
+
+            <!-- Success Message (Hidden by default) -->
+            <div id="success-message" class="mt-6 hidden">
+                <div class="bg-green-50 border-l-4 border-green-400 p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-check-circle text-green-400"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-green-700">
+                                Resume uploaded successfully! Our AI is analyzing the content.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Message (Hidden by default) -->
+            <div id="error-message" class="mt-6 hidden">
+                <div class="bg-red-50 border-l-4 border-red-400 p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exclamation-circle text-red-400"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-red-700" id="error-text">
+                                Error uploading file. Please try again.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upload Handling Script -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('resume');
+    const selectedFile = document.getElementById('selected-file');
+    const fileName = document.getElementById('file-name');
+    const uploadProgress = document.getElementById('upload-progress');
+    const progressBar = document.getElementById('progress-bar');
+    const progressPercentage = document.getElementById('progress-percentage');
+    const successMessage = document.getElementById('success-message');
+    const errorMessage = document.getElementById('error-message');
+    const errorText = document.getElementById('error-text');
+
+    // Prevent default drag behaviors
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+        document.body.addEventListener(eventName, preventDefaults, false);
+    });
+
+    // Highlight drop zone when item is dragged over it
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, unhighlight, false);
+    });
+
+    // Handle dropped files
+    dropZone.addEventListener('drop', handleDrop, false);
+    fileInput.addEventListener('change', handleFileSelect, false);
+
+    // Handle form submission
+    form.addEventListener('submit', handleSubmit, false);
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    function highlight(e) {
+        dropZone.classList.add('border-blue-500');
+    }
+
+    function unhighlight(e) {
+        dropZone.classList.remove('border-blue-500');
+    }
+
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        fileInput.files = files;
+        handleFileSelect({ target: fileInput });
+    }
+
+    function handleFileSelect(e) {
+        const file = e.target.files[0];
+        if (file) {
+            // Validate file type
+            const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+            if (!validTypes.includes(file.type)) {
+                showError('Invalid file type. Please upload a PDF, DOC, or DOCX file.');
+                fileInput.value = '';
+                return;
+            }
+
+            // Validate file size (5MB max)
+            if (file.size > 5 * 1024 * 1024) {
+                showError('File is too large. Maximum size is 5MB.');
+                fileInput.value = '';
+                return;
+            }
+
+            // Show selected filename
+            fileName.textContent = file.name;
+            selectedFile.classList.remove('hidden');
+            errorMessage.classList.add('hidden');
+        }
+    }
+
+    function handleSubmit(e) {
+        e.preventDefault();
+
+        // Validate form fields
+        const formData = new FormData(form);
+        if (!formData.get('name') || !formData.get('email') || !formData.get('phone') || !formData.get('resume')) {
+            showError('Please fill in all required fields and select a resume file.');
+            return;
+        }
+
+        // Show progress bar
+        uploadProgress.classList.remove('hidden');
+        successMessage.classList.add('hidden');
+        errorMessage.classList.add('hidden');
+
+        // Upload file and form data
+        fetch('/upload', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                showSuccess(data.message);
+                // Redirect to dashboard after a short delay
+                setTimeout(() => {
+                    window.location.href = '/dashboard';
+                }, 2000);
+            } else {
+                throw new Error(data.message || 'Upload failed');
+            }
+        })
+        .catch(error => {
+            showError(error.message);
+        })
+        .finally(() => {
+            uploadProgress.classList.add('hidden');
+        });
+    }
+
+    
+
+    function showSuccess(message) {
+        successMessage.querySelector('p').textContent = message;
+        successMessage.classList.remove('hidden');
+        errorMessage.classList.add('hidden');
+        form.reset();
+        selectedFile.classList.add('hidden');
+    }
+
+    function showError(message) {
+        errorText.textContent = message;
+        errorMessage.classList.remove('hidden');
+        successMessage.classList.add('hidden');
+    }
+});
+</script>
+{% endblock %}
