@@ -502,6 +502,11 @@ def init_database():
         return jsonify({'message': 'Database initialized successfully'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+        
+@app.route("/health")
+def health():
+    return {"status": "ok"}, 200
+
 
 @app.cli.command("init-db")
 def init_db():
