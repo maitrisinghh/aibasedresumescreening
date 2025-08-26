@@ -9,44 +9,43 @@ from ai_processor import ResumeProcessor, JobMatcher
 from data_processor import DataProcessor
 from dotenv import load_dotenv
 
-# Load environment variables
+
 load_dotenv()
 
 app = Flask(__name__)
 
-# Add min function to template context
+
 @app.template_filter('min')
 def min_filter(a, b):
     return min(a, b)
 
-# Add intersect filter for set operations
+
 @app.template_filter('intersect')
 def intersect_filter(a, b):
     """Return the intersection of two lists."""
     return list(set(a) & set(b))
 
-# Configuration
+
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', os.urandom(24))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///resume_screening.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  
 
-# Ensure upload directory exists
+
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# Initialize extensions
 db.init_app(app)
 
-# Ensure instance directory exists
+
 os.makedirs(app.instance_path, exist_ok=True)
 
-# Initialize AI processors
+
 resume_processor = ResumeProcessor()
 job_matcher = JobMatcher()
 data_processor = DataProcessor(os.path.join(app.instance_path, 'datasheet.csv'))
 
-# Allowed file extensions
+
 ALLOWED_EXTENSIONS = {'pdf', 'docx'}
 
 def allowed_file(filename):
@@ -59,19 +58,19 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        # Here you would typically validate the login credentials
+        
         return redirect(url_for('dashboard'))
     return render_template('login.html')
 
 @app.route('/dashboard')
 def dashboard():
-    # Get stats
+    
     total_candidates = Candidate.query.count()
     new_applications = Application.query.filter_by(status='pending').count()
     active_jobs = JobPosting.query.filter_by(status='active').count()
     successful_matches = Application.query.filter_by(status='accepted').count()
     
-    # Get recent applications with candidate and job details
+    
     recent_applications = db.session.query(
         Application, Candidate, JobPosting
     ).join(
@@ -82,14 +81,14 @@ def dashboard():
         Application.created_at.desc()
     ).limit(5).all()
     
-    # Get skills distribution
+    
     candidates = Candidate.query.all()
     skills_count = {}
     for candidate in candidates:
         for skill in candidate.skills:
             skills_count[skill] = skills_count.get(skill, 0) + 1
     
-    # Convert to percentage and sort
+    
     total_candidates = len(candidates)
     skills_distribution = {
         skill: round((count / total_candidates) * 100, 1)
@@ -120,7 +119,7 @@ def upload():
             flash('No file selected', 'error')
             return redirect(request.url)
         
-        # Validate required fields
+        
         name = request.form.get('name')
         email = request.form.get('email')
         phone = request.form.get('phone')
@@ -131,16 +130,16 @@ def upload():
         
         if file and allowed_file(file.filename):
             try:
-                # Save the file
+               
                 filename = secure_filename(file.filename)
                 filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 file.save(filepath)
                 
-                # Process the resume
+                
                 analysis = resume_processor.analyze_resume_sync(filepath)
                 print(analysis)
                 if analysis:
-                    # Create new candidate
+                    
                     candidate = Candidate(
                         name=name,
                         email=email,
@@ -151,7 +150,7 @@ def upload():
                         education=analysis.get('education', [])
                     )
                     print(candidate.email)
-                    # Check if email already exists
+                    
                     existing_candidate = Candidate.query.filter_by(email=email).first()
                     if existing_candidate:
                         flash('A candidate with this email already exists', 'error')
@@ -160,7 +159,7 @@ def upload():
                     db.session.add(candidate)
                     db.session.commit()
                     
-                    # Match with active job postings
+                    
                     active_jobs = JobPosting.query.filter_by(status='active').all()
                     matches = []
                     
@@ -187,7 +186,7 @@ def upload():
                     
                     db.session.commit()
                     
-                    # Return JSON response for AJAX handling
+                    
                     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                         return jsonify({
                             'status': 'success',
@@ -198,7 +197,7 @@ def upload():
                     
                     flash('Resume uploaded and analyzed successfully', 'success')
                     
-                    # Redirect to the resume results page using email
+                    
                     return redirect(url_for('resume_results', email=candidate.email))
                 else:
                     flash('Failed to analyze resume', 'error')
@@ -217,16 +216,16 @@ def upload():
 def resume_results(email):
     """Display the resume analysis results for a specific candidate by email."""
     try:
-        # Get pagination parameters
+        
         page = request.args.get('page', 1, type=int)
         per_page = request.args.get('per_page', 10, type=int)
-        use_ai = request.args.get('use_ai', '0') == '1'  # Default to quick matching
+        use_ai = request.args.get('use_ai', '0') == '1'  
         
-        # Find the candidate by email
+        
         candidate = Candidate.query.filter_by(email=email).first_or_404()
         print(f"Found candidate: {candidate.name} ({candidate.email})")
         
-        # Get candidate data for matching
+        
         candidate_data = {
             'skills': candidate.skills if candidate.skills else [],
             'experience': candidate.experience if candidate.experience else [],
@@ -234,12 +233,12 @@ def resume_results(email):
         }
         print(f"Candidate data: {candidate_data}")
         
-        # Debug print
+        #
         print("Loading jobs from CSV...")
         jobs = data_processor._get_cached_jobs()
         print(f"Loaded {len(jobs)} jobs from CSV")
         
-        # Generate matches
+        
         matches_result = data_processor.match_candidate_with_jobs(
             candidate_data,
             page=page, 
@@ -263,13 +262,13 @@ def resume_results(email):
 
 @app.route('/jobs')
 def jobs():
-    # Get query parameters
+    
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
     department = request.args.get('department')
     status = request.args.get('status')
     
-    # Build query
+    
     query = JobPosting.query
     
     if department:
@@ -277,11 +276,11 @@ def jobs():
     if status:
         query = query.filter_by(status=status)
     
-    # Get paginated results
+    
     jobs_paginated = query.paginate(page=page, per_page=per_page, error_out=False)
     jobs = jobs_paginated.items
     
-    # Prepare job data with match counts
+   
     job_data = []
     for job in jobs:
         applications = Application.query.filter_by(job_posting_id=job.id).all()
@@ -294,7 +293,7 @@ def jobs():
             'avg_score': avg_score
         })
     
-    # Get available departments and statuses for filters
+    
     departments = db.session.query(JobPosting.department).distinct().all()
     departments = [d[0] for d in departments if d[0]]
     statuses = ['active', 'closed', 'draft', 'archived']
@@ -313,7 +312,7 @@ def view_job(job_id):
     applications = Application.query.filter_by(job_posting_id=job_id)\
         .order_by(Application.match_score.desc()).all()
     
-    # Get candidate details for each application
+    
     matches = []
     for app in applications:
         candidate = Candidate.query.get(app.candidate_id)
@@ -352,12 +351,12 @@ def job_matches(job_id):
 
 @app.route('/report')
 def report():
-    # Generate analytics report
+    
     total_candidates = Candidate.query.count()
     total_jobs = JobPosting.query.count()
     total_applications = Application.query.count()
     
-    # Skills distribution
+    
     all_skills = []
     candidates = Candidate.query.all()
     for candidate in candidates:
@@ -367,7 +366,7 @@ def report():
     for skill in all_skills:
         skills_dist[skill] = skills_dist.get(skill, 0) + 1
     
-    # Department distribution
+    
     dept_dist = {}
     jobs = JobPosting.query.all()
     for job in jobs:
@@ -386,15 +385,15 @@ def report():
 @app.route('/api/jobs', methods=['POST'])
 def create_job():
     data = request.json
-    print("Received job data:", data)  # Debug print
+    print("Received job data:", data)  
     
-    # Validate required fields
+    
     required_fields = ['title', 'department', 'location', 'description', 'requirements']
     missing_fields = [field for field in required_fields if field not in data]
     if missing_fields:
         return jsonify({'error': f'Missing required fields: {", ".join(missing_fields)}'}), 400
     
-    # Validate requirements structure
+    
     if not isinstance(data['requirements'], dict):
         return jsonify({'error': 'Requirements must be a JSON object'}), 400
     
@@ -403,7 +402,7 @@ def create_job():
     if missing_req_fields:
         return jsonify({'error': f'Missing required requirement fields: {", ".join(missing_req_fields)}'}), 400
     
-    # Create job posting
+    
     job = JobPosting(
         title=data['title'],
         department=data['department'],
@@ -411,17 +410,17 @@ def create_job():
         description=data['description'],
         requirements=data['requirements'],
         salary_range=data.get('salary_range', ''),
-        status=data.get('status', 'draft')  # Default to draft status
+        status=data.get('status', 'draft')  
     )
     
     try:
         db.session.add(job)
         db.session.commit()
-        print("Job created successfully with ID:", job.id)  # Debug print
+        print("Job created successfully with ID:", job.id)  
         
-        # Verify the job was saved
+        
         saved_job = JobPosting.query.get(job.id)
-        print("Retrieved saved job:", saved_job.title if saved_job else "Not found")  # Debug print
+        print("Retrieved saved job:", saved_job.title if saved_job else "Not found")  
         
         return jsonify({
             'message': 'Job posting created successfully',
@@ -430,7 +429,7 @@ def create_job():
         })
     except Exception as e:
         db.session.rollback()
-        print("Error creating job:", str(e))  # Debug print
+        print("Error creating job:", str(e))  
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/jobs/<int:job_id>', methods=['PUT'])
@@ -438,7 +437,7 @@ def update_job(job_id):
     job = JobPosting.query.get_or_404(job_id)
     data = request.json
     
-    # Update job fields
+    
     job.title = data.get('title', job.title)
     job.department = data.get('department', job.department)
     job.location = data.get('location', job.location)
@@ -454,7 +453,7 @@ def update_job(job_id):
 def delete_job(job_id):
     job = JobPosting.query.get_or_404(job_id)
     
-    # Delete associated applications first
+   
     Application.query.filter_by(job_posting_id=job_id).delete()
     
     db.session.delete(job)
